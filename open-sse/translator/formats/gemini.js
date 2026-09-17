@@ -341,6 +341,37 @@ function ensureArrayItems(obj) {
   for (const v of Object.values(obj)) if (v && typeof v === "object") ensureArrayItems(v);
 }
 
+// Normalize shorthand/invalid properties values into a valid key-schema map
+function normalizeProperties(obj) {
+  if (!obj || typeof obj !== "object") return;
+
+  if (obj.properties) {
+    if (Array.isArray(obj.properties)) {
+      const converted = {};
+      for (const item of obj.properties) {
+        if (typeof item === "string") {
+          converted[item] = { type: "string" };
+        } else if (item && typeof item === "object" && item.name) {
+          converted[item.name] = item;
+        }
+      }
+      obj.properties = converted;
+    } else if (typeof obj.properties === "object") {
+      for (const [key, value] of Object.entries(obj.properties)) {
+        if (typeof value === "string") {
+          obj.properties[key] = { type: value };
+        } else if (!value || typeof value !== "object") {
+          obj.properties[key] = { type: "string" };
+        }
+      }
+    }
+  }
+
+  for (const v of Object.values(obj)) {
+    if (v && typeof v === "object") normalizeProperties(v);
+  }
+}
+
 // Clean JSON Schema for Antigravity API compatibility - removes unsupported keywords recursively
 export function cleanJSONSchemaForAntigravity(schema) {
   if (!schema || typeof schema !== "object") return schema;
@@ -358,7 +389,8 @@ export function cleanJSONSchemaForAntigravity(schema) {
   flattenAnyOfOneOf(cleaned);
   flattenTypeArrays(cleaned);
 
-  // Phase 2.5: Infer missing type=object when properties exist (Gemini requirement)
+  // Phase 2.5: Normalize properties and infer missing object/array requirements
+  normalizeProperties(cleaned);
   ensureObjectType(cleaned);
   ensureArrayItems(cleaned);
 
@@ -448,5 +480,4 @@ export function normalizeGeminiContents(contents) {
   }
   return out;
 }
-
 
