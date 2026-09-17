@@ -34,6 +34,21 @@ describe("cleanJSONSchemaForAntigravity", () => {
     expect(out.properties.limit).toMatchObject({ type: "integer" });
   });
 
+  it("preserves array-form properties with falsy names via stringified keys", () => {
+    const schema = {
+      type: "object",
+      properties: [
+        { name: "", type: "string" },
+        { name: 0, type: "integer" },
+      ],
+    };
+
+    const out = cleanJSONSchemaForAntigravity(JSON.parse(JSON.stringify(schema)));
+
+    expect(out.properties[""]).toEqual({ type: "string" });
+    expect(out.properties["0"]).toEqual({ type: "integer" });
+  });
+
   it("normalizes nested properties before object/array inference", () => {
     const schema = {
       type: "array",

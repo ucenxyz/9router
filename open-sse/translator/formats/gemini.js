@@ -348,12 +348,13 @@ function normalizeProperties(obj) {
   if (Object.prototype.hasOwnProperty.call(obj, "properties")) {
     if (Array.isArray(obj.properties)) {
       const converted = {};
-      for (const item of obj.properties) {
+      for (const [index, item] of obj.properties.entries()) {
         if (typeof item === "string") {
           converted[item] = { type: "string" };
-        } else if (item && typeof item === "object" && item.name) {
-          const { name, ...propertySchema } = item;
-          converted[name] = Object.keys(propertySchema).length > 0
+        } else if (item && typeof item === "object" && Object.prototype.hasOwnProperty.call(item, "name")) {
+          const { name: rawName, ...propertySchema } = item;
+          const key = rawName == null ? `property_${index}` : String(rawName);
+          converted[key] = Object.keys(propertySchema).length > 0
             ? propertySchema
             : { type: "string" };
         }
