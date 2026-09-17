@@ -352,7 +352,10 @@ function normalizeProperties(obj) {
         if (typeof item === "string") {
           converted[item] = { type: "string" };
         } else if (item && typeof item === "object" && item.name) {
-          converted[item.name] = item;
+          const { name, ...propertySchema } = item;
+          converted[name] = Object.keys(propertySchema).length > 0
+            ? propertySchema
+            : { type: "string" };
         }
       }
       obj.properties = converted;
@@ -480,4 +483,3 @@ export function normalizeGeminiContents(contents) {
   }
   return out;
 }
-
