@@ -49,4 +49,15 @@ describe("cleanJSONSchemaForAntigravity", () => {
     expect(out.items.type).toBe("object");
     expect(out.items.properties.deep).toEqual({ type: "boolean" });
   });
+
+  it("normalizes invalid falsy properties values", () => {
+    const schema = {
+      properties: null,
+    };
+
+    const out = cleanJSONSchemaForAntigravity(JSON.parse(JSON.stringify(schema)));
+
+    expect(out.type).toBe("object");
+    expect(out.properties.reason).toMatchObject({ type: "string" });
+  });
 });

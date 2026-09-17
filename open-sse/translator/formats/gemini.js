@@ -345,7 +345,7 @@ function ensureArrayItems(obj) {
 function normalizeProperties(obj) {
   if (!obj || typeof obj !== "object") return;
 
-  if (obj.properties) {
+  if (Object.prototype.hasOwnProperty.call(obj, "properties")) {
     if (Array.isArray(obj.properties)) {
       const converted = {};
       for (const item of obj.properties) {
@@ -359,7 +359,7 @@ function normalizeProperties(obj) {
         }
       }
       obj.properties = converted;
-    } else if (typeof obj.properties === "object") {
+    } else if (obj.properties && typeof obj.properties === "object") {
       for (const [key, value] of Object.entries(obj.properties)) {
         if (typeof value === "string") {
           obj.properties[key] = { type: value };
@@ -367,6 +367,8 @@ function normalizeProperties(obj) {
           obj.properties[key] = { type: "string" };
         }
       }
+    } else {
+      obj.properties = {};
     }
   }
 
